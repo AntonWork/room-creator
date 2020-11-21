@@ -10,6 +10,8 @@ import {
   Color,
   SpotLight,
   PointLight,
+  Vector2,
+  Camera,
 } from 'three';
 
 ///import { createRenderer, resizeRenderer } from '../util';
@@ -22,13 +24,18 @@ const spotLight2 = new SpotLight(0xddeedd);
 spotLight2.position.set(400, 100, 100);
 //scene.add(spotLight2);
 
-const camera = new PerspectiveCamera();
+const camera = new PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
 
 const renderer = new WebGLRenderer();
-//const renderer = createRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 renderer.setClearColor(new Color(0xd5ead5));
+//const renderer = createRenderer();
 
 const geometry = new BoxGeometry(10, 10, 10);
 const material = new MeshPhongMaterial({
@@ -43,19 +50,82 @@ scene.add(cube);
 
 camera.position.z = 50;
 
+/*
 console.log(renderer);
 console.log(scene);
 console.log(camera);
 console.log(geometry);
 console.log(material);
 console.log(cube);
+*/
 
-console.log('Hello world!');
-
-function render() {
-  requestAnimationFrame(render);
+function render_() {
+  requestAnimationFrame(render_);
+  //resizeRenderer(renderer, camera);
   cube.rotation.x += 0.01;
   cube.rotation.y += 0.01;
   renderer.render(scene, camera);
 }
-render();
+render_();
+
+///
+export function createRenderer() {
+  const renderer = new WebGLRenderer({ antialias: true });
+  document.body.appendChild(renderer.domElement);
+  renderer.setClearColor(new Color('white'));
+  renderer.setPixelRatio(window.devicePixelRatio);
+
+  renderer.domElement.style.position = 'fixed';
+  renderer.domElement.style.left = '0';
+  renderer.domElement.style.top = '0';
+  renderer.domElement.style.width = '100%';
+  renderer.domElement.style.height = '100%';
+
+  renderer.render(new Scene(), new Camera());
+
+  return renderer;
+}
+
+const sizeMap = new WeakMap<WebGLRenderer, Vector2>();
+
+export function resizeRendererToDisplaySize(renderer: WebGLRenderer) {
+  const canvas = renderer.domElement;
+  const width = canvas.offsetWidth;
+  const height = canvas.offsetHeight;
+
+  let size = sizeMap.get(renderer);
+  if (size === undefined) {
+    size = new Vector2();
+    sizeMap.set(renderer, size);
+  }
+  const newSizeX = width * window.devicePixelRatio;
+  const newSizeY = height * window.devicePixelRatio;
+
+  const needResize = newSizeX !== size.x || newSizeY !== size.y;
+  if (needResize) {
+    size.x = newSizeX;
+    size.y = newSizeY;
+    renderer.setSize(width, height, false);
+  }
+  return needResize;
+}
+
+export function resizePerspectiveCamera(
+  renderer: WebGLRenderer,
+  camera: PerspectiveCamera
+) {
+  const canvas = renderer.domElement;
+  camera.aspect = canvas.clientWidth / canvas.clientHeight;
+  camera.updateProjectionMatrix();
+}
+
+export function resizeRenderer(
+  renderer: WebGLRenderer,
+  camera: PerspectiveCamera
+) {
+  if (resizeRendererToDisplaySize(renderer)) {
+    resizePerspectiveCamera(renderer, camera);
+    return true;
+  }
+  return false;
+}
