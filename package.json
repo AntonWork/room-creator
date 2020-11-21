@@ -4,6 +4,11 @@
   "repository": "https://github.com/AntonWork/room-creator",
   "license": "UNLICENSED",
   "private": true,
+  "scripts": {
+    "start:client": "cd packages/client && yarn start",
+    "build:client": "cd packages/client && yarn build",
+    "deploy": "yarn build:client && firebase deploy"
+  },
   "dependencies": {
     "@types/node": "14.14.8",
     "cross-env": "7.0.2",
