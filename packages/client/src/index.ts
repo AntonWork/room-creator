@@ -27,6 +27,13 @@ import {
   //Face3,
 } from 'three';
 
+import jss from 'jss';
+import preset from 'jss-preset-default';
+import reset from './styles/reset';
+
+jss.setup(preset());
+jss.createStyleSheet(reset).attach();
+
 const isShiftDown = false;
 
 const camera = new PerspectiveCamera(
