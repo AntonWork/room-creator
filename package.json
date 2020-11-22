@@ -7,6 +7,8 @@
   "scripts": {
     "start:client": "cd packages/client && yarn start",
     "build:client": "cd packages/client && yarn build",
+    "lint": "yarn eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "fix": "yarn lint && git update-index --again && pretty-quick --staged",
     "deploy": "yarn build:client && firebase deploy"
   },
   "dependencies": {
@@ -26,7 +28,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn eslint . --ext .js,.jsx,.ts,.tsx --fix && git update-index --again && pretty-quick --staged"
+      "pre-commit": "yarn fix"
     }
   },
   "prettier": {

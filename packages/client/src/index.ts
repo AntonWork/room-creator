@@ -21,11 +21,11 @@ import {
   DirectionalLight,
   Vector2,
   Raycaster,
+  Object3D,
   //
   //Intersection,
   //Face3,
 } from 'three';
-import { isPropertyDeclaration } from 'typescript';
 
 const isShiftDown = false;
 
@@ -72,7 +72,7 @@ geometry.rotateX(-Math.PI / 2);
 const plane = new Mesh(geometry, new MeshBasicMaterial({ visible: false }));
 scene.add(plane);
 
-const objects: any = [];
+const objects: Object3D[] = [];
 objects.push(plane);
 
 // lights
@@ -115,14 +115,14 @@ function onDocumentMouseMove(event: MouseEvent) {
 
   // (!)
   // : any
-  const intersects: any = raycaster.intersectObjects(objects);
+  const intersects = raycaster.intersectObjects(objects);
 
   if (intersects.length > 0) {
     const intersect = intersects[0];
 
     //if (intersect ==  null || intersect == undefined) {
     //  if ( intersect.face ==  null) {
-    rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
+    rollOverMesh.position.copy(intersect.point).add(intersect.face!.normal);
     //  }
     //}
     rollOverMesh.position
@@ -147,7 +147,7 @@ function onDocumentMouseDown(event: MouseEvent) {
 
   // (!)
   // : any
-  const intersects: any = raycaster.intersectObjects(objects);
+  const intersects = raycaster.intersectObjects(objects);
 
   if (intersects.length > 0) {
     const intersect = intersects[0];
@@ -164,7 +164,7 @@ function onDocumentMouseDown(event: MouseEvent) {
       // create cube
     } else {
       const voxel = new Mesh(cubeGeo, cubeMaterial);
-      voxel.position.copy(intersect.point).add(intersect.face.normal);
+      voxel.position.copy(intersect.point).add(intersect.face!.normal);
       voxel.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
       scene.add(voxel);
 

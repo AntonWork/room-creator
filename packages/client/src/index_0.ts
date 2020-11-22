@@ -77,13 +77,16 @@ function render_() {
   requestAnimationFrame(render_);
   //cube.material.color = new Color("0xddeedd") ;
   raycaster.setFromCamera(mouse, camera); // update the picking ray with the camera and mouse position
-  const intersects: any = raycaster.intersectObjects(scene.children); // calculate objects intersecting the picking ray
+  const intersects = raycaster.intersectObjects(scene.children); // calculate objects intersecting the picking ray
 
   for (let i = 0; i < intersects.length; i++) {
     //intersects[ i ].object.material.color.set( 0xff0000 );
     if (intersects.length > 0) {
-      //console.log("intersects = ", intersects, "mouse:", mouse.x,mouse.y, intersects.length);
-      intersects[i].object.material.color.set(0xff0000);
+      const intersection = intersects[0];
+      if (intersection.object instanceof Mesh) {
+        //console.log("intersects = ", intersects, "mouse:", mouse.x,mouse.y, intersects.length);
+        intersection.object.material.color.set(0xff0000);
+      }
     }
   }
 
