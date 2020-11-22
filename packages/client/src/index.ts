@@ -2,130 +2,199 @@ import {
   WebGLRenderer,
   Scene,
   PerspectiveCamera,
-  BoxGeometry,
+  //Camera,
+  //BoxGeometry,
+  BoxBufferGeometry,
+  PlaneBufferGeometry,
+  MeshBasicMaterial,
+  MeshLambertMaterial,
+  TextureLoader,
+  GridHelper,
   //MeshBasicMaterial,
   //MeshNormalMaterial,
-  MeshPhongMaterial,
+  //MeshPhongMaterial,
   Mesh,
   Color,
-  SpotLight,
-  PointLight,
+  //SpotLight,
+  //PointLight,
+  AmbientLight,
+  DirectionalLight,
   Vector2,
-  Camera,
+  Raycaster,
+  //
+  //Intersection,
+  //Face3,
 } from 'three';
+import { isPropertyDeclaration } from 'typescript';
 
-///import { createRenderer, resizeRenderer } from '../util';
-
-const scene = new Scene();
-const spotLight = new PointLight(0xddeedd);
-spotLight.position.set(1000, 1000, 1000);
-scene.add(spotLight);
-const spotLight2 = new SpotLight(0xddeedd);
-spotLight2.position.set(400, 100, 100);
-//scene.add(spotLight2);
+const isShiftDown = false;
 
 const camera = new PerspectiveCamera(
-  75,
+  45,
   window.innerWidth / window.innerHeight,
-  0.1,
-  1000
+  1,
+  10000
 );
+camera.position.set(500, 800, 1300);
+camera.lookAt(0, 0, 0);
 
-const renderer = new WebGLRenderer();
+const scene = new Scene();
+scene.background = new Color(0xf0f0f0);
+
+// roll-over helpers
+const rollOverGeo = new BoxBufferGeometry(50, 50, 50);
+const rollOverMaterial = new MeshBasicMaterial({
+  color: 0xff0000,
+  opacity: 0.5,
+  transparent: true,
+});
+const rollOverMesh = new Mesh(rollOverGeo, rollOverMaterial);
+scene.add(rollOverMesh);
+
+// cubes
+const cubeGeo = new BoxBufferGeometry(50, 50, 50);
+const cubeMaterial = new MeshLambertMaterial({
+  color: 0xfeb74c,
+  map: new TextureLoader().load('textures/square-outline-textured.png'),
+});
+
+// grid
+const gridHelper = new GridHelper(1000, 20);
+scene.add(gridHelper);
+
+//
+const raycaster = new Raycaster();
+const mouse = new Vector2();
+
+const geometry = new PlaneBufferGeometry(1000, 1000);
+geometry.rotateX(-Math.PI / 2);
+
+const plane = new Mesh(geometry, new MeshBasicMaterial({ visible: false }));
+scene.add(plane);
+
+const objects: any = [];
+objects.push(plane);
+
+// lights
+const ambientLight = new AmbientLight(0x606060);
+scene.add(ambientLight);
+
+const directionalLight = new DirectionalLight(0xffffff);
+directionalLight.position.set(1, 0.75, 0.5).normalize();
+scene.add(directionalLight);
+
+const renderer = new WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-renderer.setClearColor(new Color(0xd5ead5));
-//const renderer = createRenderer();
 
-const geometry = new BoxGeometry(10, 10, 10);
-const material = new MeshPhongMaterial({
-  color: 0xddeedd,
-  specular: 0xbcbcbc,
-});
-//var material = new MeshNormalMaterial();
-//var material = new MeshBasicMaterial( { color: 0xDDEEDD } );
+document.addEventListener('mousemove', onDocumentMouseMove, false);
+document.addEventListener('mousedown', onDocumentMouseDown, false);
+//document.addEventListener( 'keydown', onDocumentKeyDown, false );
+//document.addEventListener( 'keyup', onDocumentKeyUp, false );
 
-const cube = new Mesh(geometry, material);
-scene.add(cube);
+window.addEventListener('resize', onWindowResize, false);
+render();
 
-camera.position.z = 50;
-
-/*
-console.log(renderer);
-console.log(scene);
-console.log(camera);
-console.log(geometry);
-console.log(material);
-console.log(cube);
-*/
-
-function render_() {
-  requestAnimationFrame(render_);
-  //resizeRenderer(renderer, camera);
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-  renderer.render(scene, camera);
-}
-render_();
-
-///
-export function createRenderer() {
-  const renderer = new WebGLRenderer({ antialias: true });
-  document.body.appendChild(renderer.domElement);
-  renderer.setClearColor(new Color('white'));
-  renderer.setPixelRatio(window.devicePixelRatio);
-
-  renderer.domElement.style.position = 'fixed';
-  renderer.domElement.style.left = '0';
-  renderer.domElement.style.top = '0';
-  renderer.domElement.style.width = '100%';
-  renderer.domElement.style.height = '100%';
-
-  renderer.render(new Scene(), new Camera());
-
-  return renderer;
-}
-
-const sizeMap = new WeakMap<WebGLRenderer, Vector2>();
-
-export function resizeRendererToDisplaySize(renderer: WebGLRenderer) {
-  const canvas = renderer.domElement;
-  const width = canvas.offsetWidth;
-  const height = canvas.offsetHeight;
-
-  let size = sizeMap.get(renderer);
-  if (size === undefined) {
-    size = new Vector2();
-    sizeMap.set(renderer, size);
-  }
-  const newSizeX = width * window.devicePixelRatio;
-  const newSizeY = height * window.devicePixelRatio;
-
-  const needResize = newSizeX !== size.x || newSizeY !== size.y;
-  if (needResize) {
-    size.x = newSizeX;
-    size.y = newSizeY;
-    renderer.setSize(width, height, false);
-  }
-  return needResize;
-}
-
-export function resizePerspectiveCamera(
-  renderer: WebGLRenderer,
-  camera: PerspectiveCamera
-) {
-  const canvas = renderer.domElement;
-  camera.aspect = canvas.clientWidth / canvas.clientHeight;
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-export function resizeRenderer(
-  renderer: WebGLRenderer,
-  camera: PerspectiveCamera
-) {
-  if (resizeRendererToDisplaySize(renderer)) {
-    resizePerspectiveCamera(renderer, camera);
-    return true;
+function onDocumentMouseMove(event: MouseEvent) {
+  event.preventDefault();
+
+  mouse.set(
+    (event.clientX / window.innerWidth) * 2 - 1,
+    -(event.clientY / window.innerHeight) * 2 + 1
+  );
+
+  raycaster.setFromCamera(mouse, camera);
+
+  // (!)
+  // : any
+  const intersects: any = raycaster.intersectObjects(objects);
+
+  if (intersects.length > 0) {
+    const intersect = intersects[0];
+
+    //if (intersect ==  null || intersect == undefined) {
+    //  if ( intersect.face ==  null) {
+    rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
+    //  }
+    //}
+    rollOverMesh.position
+      .divideScalar(50)
+      .floor()
+      .multiplyScalar(50)
+      .addScalar(25);
   }
-  return false;
+
+  render();
+}
+
+function onDocumentMouseDown(event: MouseEvent) {
+  event.preventDefault();
+
+  mouse.set(
+    (event.clientX / window.innerWidth) * 2 - 1,
+    -(event.clientY / window.innerHeight) * 2 + 1
+  );
+
+  raycaster.setFromCamera(mouse, camera);
+
+  // (!)
+  // : any
+  const intersects: any = raycaster.intersectObjects(objects);
+
+  if (intersects.length > 0) {
+    const intersect = intersects[0];
+
+    // delete cube
+
+    if (isShiftDown) {
+      if (intersect.object !== plane) {
+        scene.remove(intersect.object);
+
+        objects.splice(objects.indexOf(intersect.object), 1);
+      }
+
+      // create cube
+    } else {
+      const voxel = new Mesh(cubeGeo, cubeMaterial);
+      voxel.position.copy(intersect.point).add(intersect.face.normal);
+      voxel.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
+      scene.add(voxel);
+
+      objects.push(voxel);
+    }
+
+    render();
+  }
+}
+/*
+function onDocumentKeyDown( event ) {
+
+  switch ( event.keyCode ) {
+
+    case 16: isShiftDown = true; break;
+
+  }
+
+}*/
+/*
+function onDocumentKeyUp( event ) {
+
+  switch ( event.keyCode ) {
+
+    case 16: isShiftDown = false; break;
+
+  }
+
+}*/
+
+function render() {
+  renderer.render(scene, camera);
 }
