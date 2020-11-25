@@ -156,8 +156,9 @@ ctx!.fillText('Room Creator', 10, 50);
 // цвета
 const background_color = 0xcdcdce;
 const gridPanel_color = 0xdddfe0;
-const cube_1_color = 0x93c47d;
-const cube_2_color = 0x6fa8dc;
+const cube_1_color = new Color(0x93c47d);
+const cube_2_color = new Color(0x6fa8dc);
+let cube_color: Color;
 //const cube_3_color          = 0x8E7CC3;
 const cellSelect_Cube_color = 0xbdbdbd; //0x979797
 //const cubeCreated_color     = 0x6FA8DC;
@@ -372,7 +373,13 @@ function onDocumentMouseDown(event: MouseEvent) {
       intersect = intersects[i];
       if (intersect.object.name == 'plane') {
         if (fl_SelectCube != 0) {
-          const voxel = new Mesh(cubeGeo, cubeMaterial);
+          const voxel = new Mesh(
+            cubeGeo,
+            new MeshPhongMaterial({
+              color: cube_color,
+              shininess: 0,
+            })
+          );
           //voxel.position.copy(intersect.point).add(intersect.face!.normal);
           voxel.position.x = intersect.point.x;
           voxel.position.y = 0.0;
@@ -388,12 +395,12 @@ function onDocumentMouseDown(event: MouseEvent) {
       }
       if (intersect.object.name == 'cube_1') {
         fl_SelectCube = 1;
-        cubeMaterial.color = new Color(cube_1_color);
+        cube_color = new Color(cube_1_color);
         console.log('cube_1:', cubeMaterial.color);
       }
       if (intersect.object.name == 'cube_2') {
         fl_SelectCube = 2;
-        cubeMaterial.color = new Color(cube_2_color);
+        cube_color = new Color(cube_2_color);
         console.log('cube_2:', cubeMaterial.color);
       }
     }
