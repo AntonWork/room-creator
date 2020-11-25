@@ -292,10 +292,6 @@ scene.add(cubeCellMesh);
 
 // создаваемый куб
 const cubeGeo = new BoxGeometry(room_cell_size, room_cell_size, room_cell_size);
-const cubeMaterial = new MeshPhongMaterial({
-  //color: cube_2_color,
-  shininess: 0,
-});
 
 const raycaster = new Raycaster();
 const mouse = new Vector2();
@@ -396,12 +392,12 @@ function onDocumentMouseDown(event: MouseEvent) {
       if (intersect.object.name == 'cube_1') {
         fl_SelectCube = 1;
         cube_color = new Color(cube_1_color);
-        console.log('cube_1:', cubeMaterial.color);
+        console.log('cube_1:', cube_color);
       }
       if (intersect.object.name == 'cube_2') {
         fl_SelectCube = 2;
         cube_color = new Color(cube_2_color);
-        console.log('cube_2:', cubeMaterial.color);
+        console.log('cube_2:', cube_color);
       }
     }
 
