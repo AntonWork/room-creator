@@ -11,6 +11,9 @@
   "rules": {
     "@typescript-eslint/no-unused-vars": "error",
     "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/explicit-module-boundary-types": "off"
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "camelcase": "error",
+    "prefer-arrow-callback": "error",
+    "func-names": "error"
   }
 }
