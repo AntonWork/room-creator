@@ -38,7 +38,7 @@ export function createConfig(title: string) {
       path: path.resolve('./dist'),
     },
     resolve: {
-      extensions: ['.ts', '.js'],
+      extensions: ['.ts', '.js', '.tsx', '.jsx'],
     },
     module: {
       rules: [
